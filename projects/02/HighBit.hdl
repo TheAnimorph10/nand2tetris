@@ -1,0 +1,7 @@
+CHIP HighBit {
+	IN in[16];
+	OUT out;
+	
+	PARTS:
+	Mux(a=in[15], b=in[0], sel=false, out=out);
+}

@@ -1,0 +1,17 @@
+CHIP JmpCtrl {
+	IN	lt, gt, eq,
+		zr, ng;
+	OUT jump;
+	
+	PARTS:
+		And(a=lt, b=ng, out=lan);
+		And(a=eq, b=zr, out=eaz);
+		Not(in=zr, out=nz);
+		Not(in=ng, out=nn);
+		And(a=nz, b=nn, out=nzann);
+		And(a=nzann, b=gt, out=gtanzann);
+		Or(a=lan, b=eaz, out=lanoreaz);
+		Or(a=lanoreaz, b=gtanzann, out=jump);
+}
+		
+		

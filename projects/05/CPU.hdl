@@ -1,0 +1,53 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/CPU.hdl
+
+/**
+ * The Central Processing unit (CPU).
+ * Consists of an ALU and a set of registers, designed to fetch and 
+ * execute instructions written in the Hack machine language.
+ * In particular, the ALU executes the inputted instruction according
+ * to the Hack machine language specification, as follows. 
+ * The D and A in the language specification refer to CPU-resident registers,to the memory register addressed by A, i.e. to Memory[A].
+ * while M refers 
+ * The inM input holds the value of this register. If the current instruction 
+ * needs to write a value to M, the value is placed in outM, the address 
+ * of the target register is placed in the addressM output, and the 
+ * writeM control bit is asserted. (When writeM=0, any value may 
+ * appear in outM). The outM and writeM outputs are combinational: 
+ * they are affected instantaneously by the execution of the current 
+ * instruction. The addressM and pc outputs are clocked: although they 
+ * are affected by the execution of the current instruction, they commit 
+ * to their new values only in the next time unit. If reset == 1, then the 
+ * CPU jumps to address 0 (i.e. sets pc = 0 in next time unit) rather 
+ * than to the address resulting from executing the current instruction. 
+ */
+
+CHIP CPU {
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current program
+                         // (reset == 1) or continue executing the current
+                         // program (reset == 0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write into M? 
+        addressM[15],    // RAM address (of M)
+        pc[15];          // ROM address (of next instruction)
+
+    PARTS:
+		Ctrl(instr=instruction, aInst=aInst, val=newAVal, abit=abit, cbits=cbits, dest[0]=writeM, dest[1]=writeD, dest[2]=cwriteA, jump[2]=jlt, jump[1]=jeq, jump[0]=jgt);
+		Mux16(a=ALUResult, b[0..14]=newAVal, b[15]=false, sel=aInst, out=Ain);
+		Or(a=aInst, b=cwriteA, out=writeA);
+		ARegister(in=Ain, load=writeA, out=aVal, out[0..14]=addressM);
+		Mux16(a=aVal, b=inM, sel=abit, out=ALUInY);
+		DRegister(in=ALUResult, load=writeD, out=ALUInX);
+		Line6(in=cbits, out[5]=zx, out[4]=nx, out[3]=zy, out[2]=ny, out[1]=f, out[0]=no);
+		ALU(x=ALUInX, y=ALUInY, zx=zx, nx=nx, zy=zy, ny=ny, f=f, no=no, out=ALUResult, out=outM, zr=zr, ng=ng);
+		JmpCtrl(lt=jlt, eq=jeq, gt=jgt, zr=zr, ng=ng, jump=jump);
+		PC(in=aVal, inc=true, load=jump, reset=reset, out=pco);
+		Line16(in=pco, out[0..14]=pc);
+		
+}

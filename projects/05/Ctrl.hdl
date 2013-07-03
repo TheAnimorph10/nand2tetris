@@ -1,0 +1,17 @@
+CHIP Ctrl {
+	IN 	instr[16];
+	OUT aInst,
+		val[15],
+		abit,
+		cbits[6],
+		dest[3],
+		jump[3];
+	
+	PARTS:
+		DMux16(in=instr, sel=instr[15], a[0..14]=val, 
+		       b[12]=abit, b[6..11]=cbits, b[3..5]=dest, b[0..2]=jump);		
+		Not(in=instr[15], out=aInst);
+}
+		
+		
+	

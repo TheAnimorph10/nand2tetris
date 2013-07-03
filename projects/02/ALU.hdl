@@ -1,0 +1,72 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/02/ALU.hdl
+
+/**
+ * The ALU. Computes one of the following functions:
+ * x+y, x-y, y–x, 0, 1, -1, x, y, -x, -y, !x, !y,
+ * x+1, y+1, x-1, y-1, x&y, x|y on two 16-bit inputs.
+ * Which function to compute is determined by 6 input bits 
+ * denoted zx, nx, zy, ny, f, no.
+ * The computed function's value is called "out".
+ * In addition to computing out, the ALU computes two 
+ * 1-bit outputs called zr and ng:
+ * if out == 0, zr = 1; otherwise zr = 0;
+ * If out < 0, ng = 1; otherwise ng = 0.
+ * The 6-bit combinations (zx,nx,zy,ny,f,no) and 
+ * their effect are documented in the book. 
+ */
+
+// Implementation: the ALU manipulates the x and y
+// inputs and then operates on the resulting values, 
+// as follows:
+// if (zx  == 1) sets x = 0        // 16-bit constant
+// if (nx  == 1) sets x = ~x       // bitwise "not"
+// if (zy  == 1) sets y = 0        // 16-bit constant
+// if (ny  == 1) sets y = ~y       // bitwise "not"
+// if (f   == 1) sets out = x + y  // integer 2's-complement addition
+// if (f   == 0) sets out = x & y  // bitwise And
+// if (no  == 1) sets out = ~out   // bitwise Not
+// if (out == 0) sets zr = 1
+// if (out < 0)  sets ng = 1
+
+  
+CHIP ALU {
+    IN  
+        x[16], y[16],  // 16-bit inputs        
+        zx, // zero the x input?
+        nx, // negate the x input?
+        zy, // zero the y input?
+        ny, // negate the y input?
+        f,  // compute  out = x + y (if f == 1) or out = x & y (if == 0)
+        no; // negate the out output?
+
+    OUT 
+        out[16], // 16-bit output
+        zr, // 1 if (out == 0), 0 otherwise
+        ng; // 1 if (out < 0),  0 otherwise
+
+    PARTS:
+    Mux16(a=x, b=false, sel=zx, out=mxz); // select between x and 0
+	Mux16(a=y, b=false, sel=zy, out=myz); // select between y and 0
+	
+	Not16(in=mxz, out=nnx);				  // bitwise not x
+	Not16(in=myz, out=nny);				  // btiwise not y
+	Mux16(a=mxz, b=nnx, sel=nx, out=mxn); // select between x and not x
+	Mux16(a=myz, b=nny, sel=ny, out=myn); // select between y and not y
+	
+	And16(a=mxn, b=myn, out=and);         // bitwise and x and y
+	Add16(a=mxn, b=myn, out=add);         // add x and y
+	
+	Mux16(a=and, b=add, sel=f, out=mf);   // select between and and add
+	
+	Not16(in=mf, out=nr);                 // bitwise not output 
+	Mux16(a=mf, b=nr, sel=no, out=outA);  // select between out and not out
+	
+	HighBit(in=outA, out=ng);
+	Or16way(in=outA, out=zr0);
+	Not(in=zr0, out=zr);
+	
+	Line16(in=outA, out=out);
+}
