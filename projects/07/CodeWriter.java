@@ -29,6 +29,20 @@ public class CodeWriter {
 	}
 	
 	/**
+	 * Initializes memory locations.
+	 *
+	 */
+	public void writeSetup()
+		throws IOException 
+	{
+		fw.write("@256		\n" +
+				 "D=A		\n" +
+				 "@SP		\n" +
+				 "M=D		\n");
+	}
+	
+	
+	/**
 	 * Informs the code writer that the translation of a new VM file is 
 	 * started.
 	 *
@@ -61,7 +75,7 @@ public class CodeWriter {
 			case "eq":
 			case "gt":
 			case "lt":
-				writeBooleanBinaryOperation(command);
+				writeBooleanBinaryOperation(command.toUpperCase());
 				break;
 			case "and":
 				writeBinaryOperation("&");
@@ -80,21 +94,21 @@ public class CodeWriter {
 		throws IOException
 	{
 		
-		fw.write("@sp		// Get the loc of the stack\n" +
+		fw.write("@SP		// Get the loc of the stack\n" +
 				 "M=M-1		// Decrement the stack pointer\n" +
-				 "A=M		// Address the location of the sp\n" +
+				 "A=M		// Address the location of the SP\n" +
 				 "D=M		// Put the content of that loc in D\n" +
-				 "A=A-1		// Address the loc below the new sp\n" +
+				 "A=A-1		// Address the loc below the new SP\n" +
 				 "D=D-M		// Perform the calculation\n" +
 				 "@TRUE\n" +
 				 "D;J" + op	+ "// Jump if " + op + "\n" +
-				 "@sp		// put the result on the top of the stack\n" +
+				 "@SP		// put the result on the top of the stack\n" +
 				 "A=M-1		\n" +
 				 "M=0		// result is false\n" +
 				 "@DONE\n" +
 				 "0;JMP\n" +
 				 "(TRUE)\n" +
-				 "@sp\n" +
+				 "@SP\n" +
 				 "A=M-1\n" +
 				 "M=-1		// result is true\n" +
 				 "(DONE)\n");
@@ -103,14 +117,14 @@ public class CodeWriter {
 	private void writeBinaryOperation(String op)
 		throws IOException
 	{
-		fw.write("@sp		// Get the first value from the stack\n" +					
-				  "A=M-1	// Address the location below the sp\n" +	
+		fw.write("@SP		// Get the first value from the stack\n" +					
+				  "A=M-1	// Address the location below the SP\n" +	
 				  "D=M		// Put the content of that loc in D\n" +
-				  "@sp		// Back to the SP\n" +
+				  "@SP		// Back to the SP\n" +
 				  "M=M-1	// Decrement it\n" +			
-				  "A=M-1	// Address the loc below the new sp\n" +
+				  "A=M-1	// Address the loc below the new SP\n" +
 				  "D=D" + op + "M	// Perform the operation\n" + 
-				  "@sp		// Put the result back on top of the stack\n" +
+				  "@SP		// Put the result back on top of the stack\n" +
 				  "A=M-1	\n" +
 				  "M=D		\n");
 	}
@@ -118,7 +132,7 @@ public class CodeWriter {
 	private void writeUnaryOperation(String op)	
 		throws IOException
 	{
-		fw.write("@sp		\n" +
+		fw.write("@SP		\n" +
 				 "A=M-1		\n" +
 				 "M=" + op + "M	\n");
 	}
@@ -142,7 +156,7 @@ public class CodeWriter {
 						fw.write(
 						  "@" + index + "\n" +
 						  "D=A			 \n" +
-						  "@sp			 \n" +
+						  "@SP			 \n" +
 						  "M=M+1		 \n" +
 						  "A=M-1		 \n" +
 						  "M=D			 \n");
