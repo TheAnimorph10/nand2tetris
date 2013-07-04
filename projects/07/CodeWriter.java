@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.HashMap;
 
 /**
  * A solution to Nisan, N., and Schocken, S., (2005) The Elements of Computing 
@@ -16,6 +17,17 @@ import java.io.*;
 public class CodeWriter {
 	private FileWriter fw;
 	private String vmFile;
+	
+	private int labelIndex;
+	
+	private static final HashMap<String, String> segText = new HashMap<String, String>();
+	static {
+		segText.put("local", "LCL");
+		segText.put("argument", "ARG");
+		segText.put("this", "THIS");
+		segText.put("that", "THAT");
+	};
+	
 	/**
 	 * Opens the output file and gets ready to write into it.
 	 * 
@@ -26,6 +38,7 @@ public class CodeWriter {
 	{
 		fw = new FileWriter(file);
 		vmFile = null;
+		labelIndex = 0;
 	}
 	
 	/**
@@ -35,12 +48,22 @@ public class CodeWriter {
 	public void writeSetup()
 		throws IOException 
 	{
-		fw.write("@256		\n" +
-				 "D=A		\n" +
-				 "@SP		\n" +
-				 "M=D		\n");
+		fw.write("@256\n" +
+				 "D=A\n" +
+				 "@SP\n" +
+				 "M=D\n");
 	}
 	
+	/**
+	 * Write a comment into the output file
+	 *
+	 * @param comment the comment to be written
+	 */
+	 public void writeComment(String comment)
+		throws IOException
+	{
+		fw.write("// " + comment + "\n");
+	}
 	
 	/**
 	 * Informs the code writer that the translation of a new VM file is 
@@ -94,47 +117,48 @@ public class CodeWriter {
 		throws IOException
 	{
 		
-		fw.write("@SP		// Get the loc of the stack\n" +
-				 "M=M-1		// Decrement the stack pointer\n" +
-				 "A=M		// Address the location of the SP\n" +
-				 "D=M		// Put the content of that loc in D\n" +
-				 "A=A-1		// Address the loc below the new SP\n" +
-				 "D=D-M		// Perform the calculation\n" +
-				 "@TRUE\n" +
-				 "D;J" + op	+ "// Jump if " + op + "\n" +
-				 "@SP		// put the result on the top of the stack\n" +
-				 "A=M-1		\n" +
-				 "M=0		// result is false\n" +
-				 "@DONE\n" +
-				 "0;JMP\n" +
-				 "(TRUE)\n" +
-				 "@SP\n" +
-				 "A=M-1\n" +
-				 "M=-1		// result is true\n" +
-				 "(DONE)\n");
+		fw.write("@SP \n" +
+				 "M=M-1 \n" +
+				 "A=M \n" +
+				 "D=M \n" +
+				 "A=A-1 \n" +
+				 "D=M-D \n" +
+				 "@TRUE." + labelIndex + "\n" +
+				 "D;J" + op	+ "\n" +
+				 "@SP \n" +
+				 "A=M-1 \n" +
+				 "M=0 \n" +
+				 "@DONE." + (labelIndex + 1) + "\n" +
+				 "0;JMP \n" +
+				 "(TRUE." + labelIndex + ") \n" +
+				 "@SP \n" +
+				 "A=M-1 \n" +
+				 "M=-1 \n" +
+				 "(DONE." + (labelIndex + 1) + ") \n");
+		labelIndex += 2;
 	}
 	
 	private void writeBinaryOperation(String op)
 		throws IOException
 	{
-		fw.write("@SP		// Get the first value from the stack\n" +					
-				  "A=M-1	// Address the location below the SP\n" +	
-				  "D=M		// Put the content of that loc in D\n" +
-				  "@SP		// Back to the SP\n" +
-				  "M=M-1	// Decrement it\n" +			
-				  "A=M-1	// Address the loc below the new SP\n" +
-				  "D=D" + op + "M	// Perform the operation\n" + 
-				  "@SP		// Put the result back on top of the stack\n" +
-				  "A=M-1	\n" +
-				  "M=D		\n");
+		fw.write("@SP \n" +					
+				  "A=M-1 \n" +	
+				  "D=M \n" +
+				  "@SP \n" +
+				  "M=M-1 \n" +			
+				  "A=M-1 \n" +
+				  "D=M" + op + "D \n" + 
+				  "@SP \n" +
+				  "A=M-1 \n" +
+				  "M=D \n");
 	}
 	
 	private void writeUnaryOperation(String op)	
 		throws IOException
 	{
-		fw.write("@SP		\n" +
-				 "A=M-1		\n" +
-				 "M=" + op + "M	\n");
+		fw.write("@SP \n" +
+				 "A=M-1 \n" +
+				 "M=" + op + "M \n");
 	}
 	
 	/**
@@ -155,12 +179,16 @@ public class CodeWriter {
 					case "constant":
 						fw.write(
 						  "@" + index + "\n" +
-						  "D=A			 \n" +
-						  "@SP			 \n" +
-						  "M=M+1		 \n" +
-						  "A=M-1		 \n" +
-						  "M=D			 \n");
+						  "D=A \n" +
+						  "@SP \n" +
+						  "M=M+1 \n" +
+						  "A=M-1 \n" +
+						  "M=D \n");
 						break;
+					case "local":
+					case "argument":
+					case "this":
+					case "
 				}
 		}
 	}

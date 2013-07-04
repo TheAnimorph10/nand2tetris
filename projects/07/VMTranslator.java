@@ -62,7 +62,9 @@ import java.io.*;
 	private static void writeSetup()
 		throws IOException
 	{
-		cw.writeSetup();	
+		cw.writeComment("<Setup>");
+		cw.writeSetup();
+		cw.writeComment("<---->");
 	}
 	
 	private static void loadDirectory(File f)
@@ -88,6 +90,7 @@ import java.io.*;
 		while (p.hasMoreCommands())
 		{
 			p.advance();
+			cw.writeComment("<" + p.getWholeCommand() + ">");
 			CommandType ct = p.commandType();
 			String a1 = p.arg1();
 			String a2 = p.arg2();
@@ -103,6 +106,7 @@ import java.io.*;
 					cw.writePushPop(ct, p.arg1(), Integer.parseInt(p.arg2()));
 					break;
 			}
+			cw.writeComment("<---->");
 		}
 	}
 			
