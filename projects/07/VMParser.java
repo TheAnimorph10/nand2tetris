@@ -52,6 +52,11 @@ public class VMParser {
 		return nextLine != null;
 	}
 	
+	public String getWholeCommand()
+	{
+		return current;
+	}
+	
 	/**
 	 * Reads the next command from the input and makes it the current command.
 	 * Should only be called if <code>hasMoreCommands()</code> is true.
