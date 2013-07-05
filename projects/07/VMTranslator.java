@@ -21,13 +21,8 @@ import java.io.*;
 		try {
 			String fileName = args[0];
 			try {
-<<<<<<< HEAD
-				if (fileName.substring(fileName.length()-3, fileName.length()).equals(".vm")) {
-					fileName = fileName.substring(fileName.length()-3);
-=======
 				if (fileName.substring(fileName.length()-3).equals(".vm")) {
 					fileName = fileName.substring(0, fileName.length()-3);
->>>>>>> 26c1d5c02c2b4a06bc05f75bcddf2df5626103d3
 				}
 			} catch (StringIndexOutOfBoundsException e) {
 				System.err.println("String oob.");
@@ -46,14 +41,8 @@ import java.io.*;
 			System.exit(3);
 		}
 		
-<<<<<<< HEAD
-		
-		
-		try {
-=======
 		try {
 			writeSetup();
->>>>>>> 26c1d5c02c2b4a06bc05f75bcddf2df5626103d3
 			File f = new File(args[0]);
 			if (f.isDirectory()) {
 				loadDirectory(f);
@@ -76,12 +65,6 @@ import java.io.*;
 		cw.writeComment("<Setup>");
 		cw.writeSetup();
 		cw.writeComment("<---->");
-	}
-	
-	private static void writeSetup()
-		throws IOException
-	{
-		cw.writeSetup();	
 	}
 	
 	private static void loadDirectory(File f)
