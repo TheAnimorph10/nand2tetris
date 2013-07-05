@@ -29,6 +29,19 @@ public class CodeWriter {
 	}
 	
 	/**
+	 * Initializes memory locations.
+	 *
+	 */
+	public void writeSetup()
+	{
+		fw.write("@256		\n" +
+				 "D=A		\n" +
+				 "@sp		\n" +
+				 "M=D		\n");
+	}
+	
+	
+	/**
 	 * Informs the code writer that the translation of a new VM file is 
 	 * started.
 	 *

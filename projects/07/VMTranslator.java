@@ -19,7 +19,17 @@ import java.io.*;
 	public static void main(String[] args)
 	{
 		try {
-			cw = new CodeWriter(new File(args[1]));
+			String fileName = args[0];
+			try {
+				if (fileName.substring(fileName.length()-3, fileName.length()).equals(".vm")) {
+					fileName = fileName.substring(fileName.length()-3);
+				}
+			} catch (StringIndexOutOfBoundsException e) {
+				System.err.println("String oob.");
+			} catch (ArrayIndexOutOfBoundsException e) {
+				System.err.println("String oob.");
+			}
+			cw = new CodeWriter(new File(fileName + ".asm"));
 		} catch (FileNotFoundException e) {
 			System.err.println("Could not find file or directory for writing.");
 			System.exit(2);
@@ -30,9 +40,11 @@ import java.io.*;
 			System.err.println("Error reading or writing file.");
 			System.exit(3);
 		}
-		File f;
+		
+		
+		
 		try {
-			f = new File(args[0]);
+			File f = new File(args[0]);
 			if (f.isDirectory()) {
 				loadDirectory(f);
 			} else {
@@ -46,6 +58,12 @@ import java.io.*;
 			System.err.println("Error reading or writing file.");
 			System.exit(3);
 		}
+	}
+	
+	private static void writeSetup()
+		throws IOException
+	{
+		cw.writeSetup();	
 	}
 	
 	private static void loadDirectory(File f)
