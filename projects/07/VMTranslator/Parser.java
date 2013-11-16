@@ -19,13 +19,15 @@ import java.util.HashMap;
  * Copyright John Littlewood, 2013, all rights reserved.
  */
  public class Parser {
+	private static final Level logLevel = Level.WARNING;
+	private Logger log;
+ 
 	private FileReader input;
 	private boolean eof = false;
 	private Command currentCommand;
 	private Command nextCommand;
 	private boolean hasMoreCommands;
 	private int lineNumber;
-	private Logger log;
 	private static HashMap<String, CommandType> commandTypes = new HashMap<String, CommandType>();
 	static {
 		commandTypes.put("add", CommandType.C_ARITHMETIC);
@@ -64,7 +66,7 @@ import java.util.HashMap;
 		});
 		h.setLevel(Level.INFO);
 		log.addHandler(h);
-		log.setLevel(Level.INFO);
+		log.setLevel(logLevel);
 		
 		input = new FileReader(file);
 		nextCommand = null;
@@ -169,9 +171,12 @@ import java.util.HashMap;
 			spaceless = spaceless.replace("  ", " ");
 		}
 		log.info("\t\tStripped consecutive spaces: <" + spaceless.concat(">"));
-		// strip the leading space, if there is one
+		// strip the leading and trailing space, if there is one
 		if (spaceless.length() > 0 && spaceless.charAt(0) == ' ') {
 			spaceless = spaceless.substring(1);
+		}
+		if (spaceless.length() > 0 && spaceless.charAt(spaceless.length()-1) == ' ') {
+			spaceless = spaceless.substring(0, spaceless.length()-1);
 		}
 		
 		log.info("\t\tStripped line: <" + spaceless.concat(">"));
@@ -237,6 +242,13 @@ import java.util.HashMap;
 		public final String arg1;
 		public final Integer arg2;
 		
+		/**
+		 * Creates a new command object. Takes a line of VM code, and splits it
+		 * into its constituent parts: <code><command> <arg1> <arg2></code>,
+		 * then stores these for later use.
+		 *
+		 * @param text the command text
+		 */
 		public Command(String text) {
 			String cm = "";
 			int i=0;
@@ -275,18 +287,5 @@ import java.util.HashMap;
 		public String toString() {
 			return ""+ ct + ":" + arg1 + ":" + arg2;
 		}
-	}
-			
-	
-	public enum CommandType {
-		C_ARITHMETIC,
-		C_PUSH,
-		C_POP,
-		C_LABEL,
-		C_GOTO,
-		C_IF,
-		C_FUNCTION,
-		C_RETURN,
-		C_CALL
 	}
 }

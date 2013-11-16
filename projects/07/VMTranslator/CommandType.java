@@ -13,13 +13,24 @@
  * Copyright John Littlewood, 2013, all rights reserved.
  */
 public enum CommandType {
-	C_ARITHMETIC,
-	C_PUSH,
-	C_POP,
-	C_LABEL,
-	C_GOTO,
-	C_IF,
-	C_FUNCTION,
-	C_RETURN,
-	C_CALL;
+	
+	C_ARITHMETIC("arithmetic"),
+	C_PUSH("push"),
+	C_POP("pop"),
+	C_LABEL("label"),
+	C_GOTO("goto"),
+	C_IF("if-goto"),
+	C_FUNCTION("function"),
+	C_RETURN("return"),
+	C_CALL("call");
+	
+	private String command;
+	CommandType(String command) {
+		this.command = command;
+	}
+	
+	public String toString()
+	{
+		return command;
+	}
 }

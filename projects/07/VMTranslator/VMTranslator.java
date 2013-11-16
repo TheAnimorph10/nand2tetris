@@ -1,5 +1,3 @@
-package com.littlewood.nand2tetris.vmtranslator;
-
 import java.io.*;
 
 /**
@@ -16,7 +14,7 @@ import java.io.*;
  * Copyright John Littlewood, 2013, all rights reserved.
  */
 public class VMTranslator {
-	CodeWriter output;
+	private CodeWriter output;
 	
     /**
 	 * Parses a vm file or collection of vm files and translates them into 
@@ -24,7 +22,7 @@ public class VMTranslator {
 	 */ 
 	public static void main(String[] args) throws IOException {
 		if (args.length != 1) {
-			throw new InvalidArgumentException("Usage is 'VMTranslator <.vm file or directory>');
+			throw new IllegalArgumentException("Usage is 'VMTranslator <.vm file or directory>'");
 		}
 		VMTranslator vmt = new VMTranslator(args[0]);
 	}
@@ -37,7 +35,7 @@ public class VMTranslator {
 				loadAndTranslate(s);
 			}
 		} else {
-			setOutput(filename.substring(0, name.length()-3));
+			setOutput(filename.substring(0, filename.length()-3));
 			loadAndTranslate(filename);
 		}
 		output.close();
@@ -48,14 +46,14 @@ public class VMTranslator {
 	 */
 	private void setOutput(String filename) throws IOException {
 		File f = new File(filename + ".asm");
-		FileOutputStream out = new FileOutputStream(f);
+		FileWriter out = new FileWriter(f);
 		output = new CodeWriter(out);
 	}
 	
 	/**
 	 * Load and translate the file with the given name.
 	 */
-	public void loadAndTranslate(String s) {
+	public void loadAndTranslate(String s) throws IOException {
 		File file = load(s);
 		if (file != null) {
 			translate(file);
@@ -78,11 +76,13 @@ public class VMTranslator {
 	 */
 	 private void translate(File file) throws IOException
 	 {
-		output.setFileName(file.getName());
+		output.writeInit();
+		output.setFileName(file.getName().replace(".vm",""));
 		Parser parser = new Parser(file);
 		while (parser.hasMoreCommands()) {
 			parser.advance();
 			CommandType ct = parser.commandType();
+			String label, functionName;
 			switch (ct) {
 				case C_ARITHMETIC: 
 					String cmd = parser.arg1();
@@ -92,14 +92,32 @@ public class VMTranslator {
 				case C_POP:
 					String seg = parser.arg1();
 					int index = parser.arg2();
-					writePushPop(ct, seg, index);
+					output.writePushPop(ct, seg, index);
 					break;
 				case C_LABEL:
+					label = parser.arg1();
+					output.writeLabel(label);
+					break;
 				case C_GOTO:
+					label = parser.arg1();
+					output.writeGoto(label);
+					break;
 				case C_IF:
+					label = parser.arg1();
+					output.writeIf(label);
+					break;
 				case C_FUNCTION:
+					functionName = parser.arg1();
+					int numLocals = parser.arg2();
+					output.writeFunction(functionName, numLocals);
+					break;
 				case C_RETURN:
+					output.writeReturn();
+					break;
 				case C_CALL:
+					functionName = parser.arg1();
+					int numArgs = parser.arg2();
+					output.writeCall(functionName, numArgs);
 					break;
 			}
 		}		
