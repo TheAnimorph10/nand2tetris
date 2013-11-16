@@ -63,7 +63,7 @@ public class CodeWriter {
 		throws IOException
 	{
 		fw.write("// " + comment + "\n");
-	}
+	}	
 	
 	/**
 	 * Informs the code writer that the translation of a new VM file is 
@@ -188,7 +188,8 @@ public class CodeWriter {
 					case "local":
 					case "argument":
 					case "this":
-					case "
+					case "that":
+						break;
 				}
 		}
 	}
